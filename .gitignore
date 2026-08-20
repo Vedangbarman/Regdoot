@@ -1,0 +1,34 @@
+# Environments & Secrets
+venv/
+.venv/
+.env
+**/mlruns/
+# Python Cache
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data 
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+*.csv
+*.parquet
+
+# Saved ML Models 
+saved_models/*
+!saved_models/.gitkeep
+*.pkl
+*.h5
+*.pt
+
+# Personal Notes & Logs
+notes/
+*.log
+
+# OS Junk (Windows)
+Thumbs.db
+desktop.ini

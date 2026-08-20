@@ -4,7 +4,7 @@ import json
 import asyncio
 import requests
 import pandas as pd
-from ring import current_week_file
+from week_file_save import current_week_file
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone, timedelta
 
@@ -17,8 +17,6 @@ os.makedirs(out_dir_notifications,exist_ok = True)
 out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
 os.makedirs(out_dir_error_logs,exist_ok = True)
 
-      
-        
         
 def isFileEmpty(filename): 
     try:

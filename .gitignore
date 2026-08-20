@@ -11,10 +11,10 @@ __pycache__/
 .ipynb_checkpoints/
 
 # Data 
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+data/error_logs/*
+data/notifications/*
+!data/notifications/.gitkeep
+!data/error_logs/.gitkeep
 *.csv
 *.parquet
 

@@ -1,4 +1,6 @@
 {
     "time_scraper" : 9,
-    "run_count" : 1
+    "run_count" : 1,
+    "ref_date" :"null" ,
+    "delta_ref_date": "null"
 }

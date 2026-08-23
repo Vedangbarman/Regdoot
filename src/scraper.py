@@ -4,8 +4,9 @@ import json
 import asyncio
 import requests
 import pandas as pd
-from utils.week_file_save import current_week_file
 from bs4 import BeautifulSoup
+from utils.data_check import check_data
+from utils.week_file_save import current_week_file
 from datetime import datetime, timezone, timedelta
 
 
@@ -35,15 +36,13 @@ async def rbi_webscraper():
     while count < 5:
         try: 
             url = "https://rbi.org.in/notifications_rss.xml"
-            resp.raise_for_status()
             resp = requests.get(url)
-
+            resp.raise_for_status()
             soup = BeautifulSoup(resp.content, features="xml")
 
             items = soup.find_all('item')
 
-            pr_items = []
-            
+            pr_items = [] 
             format_notifications = "csv"
             current_path_notifications = current_week_file(out_dir_notifications,format_notifications)
             for item in items:
@@ -53,32 +52,37 @@ async def rbi_webscraper():
                 pr_item['link'] = item.link.text
                 pr_item['pubDate'] = item.pubDate.text
                 pr_items.append(pr_item)
-        
-                   
-            pr_dataframe = pd.DataFrame(pr_items,columns=['title','description','link','pubDate'])
+            
             if pr_items:
-                path_check = os.path.exists(current_path_notifications)
-                if path_check == True:
-                    if isFileEmpty(current_path_notifications) == True:
-                        pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                    else:
-                        pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')
+                checked_pr_items = check_data(pr_items)
+                    
+                if checked_pr_items:
+                    pr_dataframe = pd.DataFrame(checked_pr_items,columns=['title','description','link','pubDate'])
+                    path_check = os.path.exists(current_path_notifications)
+                        
+                    if path_check == True:
+                        if isFileEmpty(current_path_notifications) == True:
+                                    pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
+                        else:
+                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')            
+                            print(f"Data saved to {current_path_notifications}")
                             
-                    print(f"Data saved to {current_path_notifications}")
-                    break
+                            
+                    else:
+                        pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
+                        return True 
+                    
                 else:
-                    pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                    break
-            else:
-                break
-            
-            
-        
+                    print("nothing Found")
+                    return False
+                       
         except Exception as e:
+            
             print(f"Error {e}")
             error_message = str(e)
             count +=1
             time = str(datetime.now(timezone.utc))
+            
             errors_ds = {}
             errors_ds['Error_Message'] = error_message
             errors_ds['Time'] = time
@@ -91,17 +95,11 @@ async def rbi_webscraper():
             with open (current_path_error_log, "a") as file:
                 file.write(data + "\n")
             print(f"Data saved to {current_path_error_log}")
-        
-                  
-        
+
         sleep_count = count*5
         print(f"Retrying in {sleep_count} seconds.......")
         await asyncio.sleep(sleep_count)
-        if count == 5:
-            return False
-        else :
-            return True
-        
+                
 if __name__ == "__main__":
     asyncio.run(rbi_webscraper())
         

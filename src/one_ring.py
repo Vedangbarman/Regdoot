@@ -29,8 +29,6 @@ async def ring():
                 if flag == True:
                     continue
                 
-            else:
-                pass
             
         except Exception as e:
             print(f"Error {e}")

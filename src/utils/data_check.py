@@ -1,15 +1,16 @@
 import os
-import lxml
 import json 
-import asyncio
-import requests
-import pandas as pd
-from bs4 import BeautifulSoup
-from datetime import datetime, timezone, timedelta
+from datetime import datetime,timezone
+from utils.week_file_save import current_week_file
+
+
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 in_dir_config_file = os.path.abspath(os.path.join(script_dir,"..","..","config.json"))
+out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
+
+
 
 
 def check_data(article_list):
@@ -49,7 +50,7 @@ def check_data(article_list):
                     data["data_check"]["ref_article"] = article_list[0]["link"]
                     
                 else:
-                    data["data_check"]["ref_date"] = ref_date                
+                    data["data_check"]["delta_ref_date"] = ref_date                
                     data["data_check"]["ref_date"] = article_list[0]["pubDate"]
                     data["data_check"]["ref_article"] = article_list[0]["link"]
                     
@@ -60,4 +61,18 @@ def check_data(article_list):
             
         except Exception as e:
             print(f"Error: {e}")
+            print(f"Error {e}")
+            error_message = str(e)
+            time = str(datetime.now(timezone.utc))
+            errors_ds = {}
+            errors_ds['Error_Message'] = error_message
+            errors_ds['Time'] = time
+            errors_ds['Error Count'] = "not_applicable"
+            errors_ds['Error_File'] = "Scraper"          
+            format_errors = "json"
+            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
+            data = json.dumps(errors_ds)
+            with open (current_path_error_log, "a") as file:
+                file.write(data + "\n")
+            print(f"Data saved to {current_path_error_log}")
             return []

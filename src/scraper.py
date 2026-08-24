@@ -26,7 +26,8 @@ def isFileEmpty(filename):
         else:
             return True
     except OSError:
-        print ("No file")
+        flag = 1
+        return flag
 
 
 
@@ -63,10 +64,18 @@ async def rbi_webscraper():
                     if path_check == True:
                         if isFileEmpty(current_path_notifications) == True:
                                     pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                        else:
+                                    return True
+                                
+                        elif isFileEmpty(current_path_notifications) == False:
                             pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')            
                             print(f"Data saved to {current_path_notifications}")
-                            
+                            return True
+                        
+                        elif  isFileEmpty(current_path_notifications) == 1:
+                            return False
+                           
+                        else:
+                            return False                          
                             
                     else:
                         pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
@@ -75,6 +84,9 @@ async def rbi_webscraper():
                 else:
                     print("nothing Found")
                     return False
+            else:
+                print("nothing Found")
+                return False
                        
         except Exception as e:
             

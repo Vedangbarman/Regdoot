@@ -1,9 +1,5 @@
 import os
-import json
-import asyncio
-import pandas as pd
 from datetime import datetime, timezone, timedelta
-
 
 def current_week_file(out_dir,format):
     today = datetime.now(timezone.utc).date()

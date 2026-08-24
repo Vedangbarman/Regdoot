@@ -8,8 +8,9 @@ from utils.week_file_save import current_week_file
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 in_dir_config_file = os.path.abspath(os.path.join(script_dir,"..","..","config.json"))
-out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
 
+out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
+os.makedirs(out_dir_error_logs, exist_ok=True)
 
 
 
@@ -26,10 +27,10 @@ def check_data(article_list):
             
             
             for article in article_list :
-                if ref_date == "null" and delta_ref_date == "null" and ref_article == "null":
+                if ref_date == "zero" and delta_ref_date == "zero" and ref_article == "zero":
                     valid_articles.append(article)
                 
-                elif ref_date != "null" and delta_ref_date != "null" and ref_article != "null":
+                elif ref_date != "zero" and delta_ref_date != "zero" and ref_article != "zero":
                     pubDate = article["pubDate"]
                     pubDate_formatted = datetime.strptime(pubDate,date_format)
                     ref_date_formatted = datetime.strptime(ref_date,date_format)

@@ -32,3 +32,6 @@ notes/
 # OS Junk (Windows)
 Thumbs.db
 desktop.ini
+
+#specific file 
+/config copy.json

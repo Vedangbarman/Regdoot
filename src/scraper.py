@@ -62,16 +62,17 @@ async def rbi_webscraper():
                     path_check = os.path.exists(current_path_notifications)
                         
                     if path_check == True:
-                        if isFileEmpty(current_path_notifications) == True:
+                        file_empty_status = isFileEmpty(current_path_notifications)
+                        if file_empty_status == True:
                                     pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
                                     return True
                                 
-                        elif isFileEmpty(current_path_notifications) == False:
+                        elif file_empty_status == False:
                             pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')            
                             print(f"Data saved to {current_path_notifications}")
                             return True
                         
-                        elif  isFileEmpty(current_path_notifications) == 1:
+                        elif  file_empty_status == 1:
                             return False
                            
                         else:

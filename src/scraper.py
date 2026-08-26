@@ -18,6 +18,7 @@ os.makedirs(out_dir_notifications,exist_ok = True)
 out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
 os.makedirs(out_dir_error_logs,exist_ok = True)
 
+in_dir_config_file = os.path.abspath(os.path.join(script_dir,"..","config.json"))
         
 def isFileEmpty(filename): 
     try:
@@ -42,7 +43,8 @@ async def rbi_webscraper():
             soup = BeautifulSoup(resp.content, features="xml")
 
             items = soup.find_all('item')
-
+            with open (in_dir_config_file) as config_file:
+                config_data = json.load(config_file)
             pr_items = [] 
             format_notifications = "csv"
             current_path_notifications = current_week_file(out_dir_notifications,format_notifications)
@@ -55,7 +57,8 @@ async def rbi_webscraper():
                 pr_items.append(pr_item)
             
             if pr_items:
-                checked_pr_items = check_data(pr_items)
+                str_current_path_notification  = str(current_path_notifications)
+                checked_pr_items = check_data(pr_items,str_current_path_notification)
                     
                 if checked_pr_items:
                     pr_dataframe = pd.DataFrame(checked_pr_items,columns=['title','description','link','pubDate'])
@@ -64,11 +67,12 @@ async def rbi_webscraper():
                     if path_check == True:
                         file_empty_status = isFileEmpty(current_path_notifications)
                         if file_empty_status == True:
-                                    pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                                    return True
+                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
+                            print(f"Data saved to {current_path_notifications}")
+                            return True
                                 
                         elif file_empty_status == False:
-                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')            
+                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')
                             print(f"Data saved to {current_path_notifications}")
                             return True
                         
@@ -80,15 +84,17 @@ async def rbi_webscraper():
                             
                     else:
                         pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
+                        print(f"Data saved to {current_path_notifications}")
                         return True 
-                    
+                
                 else:
                     print("nothing Found")
                     return False
             else:
                 print("nothing Found")
                 return False
-                       
+            
+            
         except Exception as e:
             
             print(f"Error {e}")

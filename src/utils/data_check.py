@@ -14,7 +14,7 @@ os.makedirs(out_dir_error_logs, exist_ok=True)
 
 
 
-def check_data(article_list):
+def check_data(article_list,file_path):
         try:
             with open (in_dir_config_file,) as file:
                 data = json.load(file)
@@ -45,15 +45,17 @@ def check_data(article_list):
                     print("Reference Value are missing!")
             
             if article_list:
-                if ref_date == "null" : 
+                if ref_date == "zero" : 
                     data["data_check"]["ref_date"] = article_list[0]["pubDate"]
                     data["data_check"]["delta_ref_date"] = article_list[0]["pubDate"]
                     data["data_check"]["ref_article"] = article_list[0]["link"]
+                    data["data_check"]["ref_file"] = str(file_path)  
                     
                 else:
                     data["data_check"]["delta_ref_date"] = ref_date                
                     data["data_check"]["ref_date"] = article_list[0]["pubDate"]
                     data["data_check"]["ref_article"] = article_list[0]["link"]
+                    data["data_check"]["ref_file"] = str(file_path) 
                     
                 with open(in_dir_config_file, "w") as file:
                     json.dump(data, file, indent=4)

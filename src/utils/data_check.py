@@ -3,9 +3,6 @@ import json
 from datetime import datetime,timezone
 from utils.week_file_save import current_week_file
 
-
-
-
 script_dir = os.path.dirname(os.path.realpath(__file__))
 in_dir_config_file = os.path.abspath(os.path.join(script_dir,"..","..","config.json"))
 

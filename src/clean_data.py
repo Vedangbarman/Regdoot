@@ -1,9 +1,11 @@
 import os
 import json 
+import traceback
 import pandas as pd
 from bs4 import BeautifulSoup
-from utils.week_file_save import current_week_file
 from datetime import datetime
+from utils.week_file_save import current_week_file
+
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 out_dir_notifications = os.path.abspath(os.path.join(script_dir,"..","data","notifications"))
@@ -59,16 +61,20 @@ def check_data():
         if ref_date_formatted == delta_ref_date_formatted:
             if file_empty_status == True:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
-                notification_data.to_csv(clean_xml_path, header=True, index=False)
+                notification_data.to_csv(clean_xml_path,mode = 'a',header = True,index = False, encoding = 'utf-8')
                 print(f"Data Saved to {clean_xml_path}")
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
+                with open(in_dir_config_file, 'w') as file:
+                    json.dump(config_data, file, indent=4)
                 return True
             
             elif file_empty_status == False:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
-                notification_data.to_csv(clean_xml_path, header=False, index=False)
+                notification_data.to_csv(clean_xml_path,mode = 'a',header = False,index = False, encoding = 'utf-8')
                 print(f"Data Saved to {clean_xml_path}")
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
+                with open(in_dir_config_file, 'w') as file:
+                    json.dump(config_data, file, indent=4)
                 return True
             
             elif file_empty_status == "os_error":
@@ -80,16 +86,20 @@ def check_data():
         elif ref_date_formatted > delta_ref_date_formatted:
             if file_empty_status == True:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)       
-                notification_data.to_csv(clean_xml_path, header=True, index=False)
+                notification_data.to_csv(clean_xml_path,mode = 'a',header = True,index = False, encoding = 'utf-8')
                 print(f"Data Saved to {clean_xml_path}")
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
+                with open(in_dir_config_file, 'w') as file:
+                    json.dump(config_data, file, indent=4)
                 return True
                     
             elif file_empty_status == False:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
-                notification_data.to_csv(clean_xml_path, header=False, index=False)
+                notification_data.to_csv(clean_xml_path,mode = 'a',header = False,index = False, encoding = 'utf-8')
                 print(f"Data Saved to {clean_xml_path}")
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
+                with open(in_dir_config_file, 'w') as file:
+                    json.dump(config_data, file, indent=4)
                 return True
                     
             elif file_empty_status == "os_error":
@@ -100,6 +110,9 @@ def check_data():
             
         else:
             return False
-    
+
+        
+            
     except Exception as e:
+        traceback.print_exc()
         print(e)

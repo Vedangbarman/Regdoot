@@ -27,7 +27,7 @@ def isFileEmpty(filename):
         else:
             return True
     except OSError:
-        flag = 1
+        flag = "os_error"
         return flag
 
 
@@ -76,7 +76,7 @@ async def rbi_webscraper():
                             print(f"Data saved to {current_path_notifications}")
                             return True
                         
-                        elif  file_empty_status == 1:
+                        elif  file_empty_status == "os_error":
                             return False
                            
                         else:

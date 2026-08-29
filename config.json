@@ -7,6 +7,7 @@
         "ref_date": "Tue, 25 Aug 2026 18:30:00",
         "delta_ref_date": "Tue, 25 Aug 2026 18:30:00",
         "ref_article": "https://www.rbi.org.in/scripts/NotificationUser.aspx?Id=13690&Mode=0",
-        "ref_file": "C:\\Users\\VEDANG BARMAN\\Desktop\\Regulatory Compliance Agent\\data\\notifications\\2026-08-24.csv"
+        "ref_file": "C:\\Users\\VEDANG BARMAN\\Desktop\\Regulatory Compliance Agent\\data\\notifications\\2026-08-24.csv",
+        "clean_ref_file" : ""
     }
 }

@@ -18,7 +18,7 @@ data/master_directory/*
 !data/notifications/.gitkeep
 !data/error_logs/.gitkeep
 !data/notifications_clean/.gitkeep
-!data/notifications_clean/.gitkeeps
+!data/master_directory/.gitkeep
 *.csv
 *.parquet
 

@@ -15,10 +15,10 @@ data/error_logs/*
 data/notifications/*
 data/notifications_clean/*
 data/master_directory/*
+data/notification_historical/*
 !data/notifications/.gitkeep
 !data/error_logs/.gitkeep
 !data/notifications_clean/.gitkeep
-!data/master_directory/.gitkeep
 *.csv
 *.parquet
 

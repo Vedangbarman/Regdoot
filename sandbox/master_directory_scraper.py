@@ -21,9 +21,7 @@ def scrape_master_directory():
         soup = BeautifulSoup(resp.content, features="html.parser")
         
         title = soup.find('b').get_text(strip=True)
-        # for junk in title.find_all(["script", "style", "input"]):
-        #     junk.decompose()
-        # clean_title = content.get_text(separator="\n", strip=True).replace("\r", "")
+        
         
         content = soup.find('tr', class_='tablecontent2')
         for junk in content.find_all(["script", "style", "input"]):

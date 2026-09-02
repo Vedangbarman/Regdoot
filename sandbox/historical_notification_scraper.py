@@ -23,7 +23,6 @@ async def scrape_historical_notification():
                 resp = requests.get(url)
                 resp.raise_for_status()
                 soup = BeautifulSoup(resp.content, features="html.parser")
-                
                 title = soup.find('b').get_text(strip=True)
                 
                 

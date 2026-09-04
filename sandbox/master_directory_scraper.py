@@ -17,8 +17,7 @@ async def scrape_master_directory():
     file_path = os.path.abspath(os.path.join(out_dir_master_directory,f"master_directory.jsonl"))
     count = 0
     i = 0 
-    while True:
-        try:
+    try:
             for i in range(0,42):
                 if i <= 34:
                     id = intial_id + i
@@ -39,7 +38,7 @@ async def scrape_master_directory():
                     with open(file_path,"a",encoding = "utf-8") as f:
                         f.write(json.dumps(clean_data) + "\n")
                 
-                elif i > 34:
+                elif i > 34 and i < 41:
                     id = second_id + i
                     url = f"https://rbi.org.in/scripts/BS_ViewMasDirections.aspx?id={id}"
                     resp = requests.get(url)
@@ -56,13 +55,11 @@ async def scrape_master_directory():
                         f.write(json.dumps(clean_data )+ "\n")
                 elif i == 41:
                     break
-        except Exception as e:
-            if count < 25:
-                traceback.print_exc()
-                count +=5
-                await asyncio.sleep(count)
-            else:
-                break
+            
+    except Exception as e:
+        traceback.print_exc()
+
+            
             
             
 if __name__ == "__main__": 

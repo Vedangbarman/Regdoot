@@ -15,8 +15,8 @@ async def scrape_historical_notification():
     intial_id = 12925
     count = 0
     i = 0
-    while i < 766:
-        for i in range(0,766):
+   
+    for i in range(0,766):
             try : 
                 id = intial_id + i
                 url = f"https://rbi.org.in/scripts/NotificationUser.aspx?Id={id}"

@@ -18,7 +18,7 @@ async def scrape_master_directory():
     count = 0
     i = 0 
     try:
-            for i in range(0,42):
+            for i in range(0,45):
                 if i <= 34:
                     id = intial_id + i
                     url = f"https://rbi.org.in/scripts/BS_ViewMasDirections.aspx?id={id}"
@@ -38,8 +38,9 @@ async def scrape_master_directory():
                     with open(file_path,"a",encoding = "utf-8") as f:
                         f.write(json.dumps(clean_data) + "\n")
                 
-                elif i > 34 and i < 41:
-                    id = second_id + i
+                elif i > 34 and i < 45:
+                    id = second_id + count
+                    count +=1 
                     url = f"https://rbi.org.in/scripts/BS_ViewMasDirections.aspx?id={id}"
                     resp = requests.get(url)
                     resp.raise_for_status()

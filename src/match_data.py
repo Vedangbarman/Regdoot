@@ -2,6 +2,7 @@ import re
 import os
 import json
 import pandas as pd
+from toolz import compose
 from collections import defaultdict
 from difflib import SequenceMatcher
 
@@ -46,7 +47,26 @@ def extract_names(text):
         return [norm(x) for x in (p1.findall(text) + p2.findall(text))]
         
 
+def get_lead(text):
+    lead_break = re.compile(r"\n\s*2\.\s") #extract text from the first para 
+    
+    if not isinstance(text,str):
+        return []
+    
+    else:
+        m = lead_break.search(text)
+        return text[:m.start()] if m else text[:600] #return first 600 characters 
+                                                     #if the text 2nd section is not found before 600 characters
+                                                     # used bucketing only! 
+                                                     # gatorade
+        
 
 def match_data():
         
     notifications["extracted_title"] = notifications["title"].apply(extract_names)
+    notifications["extracted_text"] = notifications["text"].apply(extract_names)
+        
+    notifications["extracted_text_lead"] = [extract_names(get_lead(t)) for t in notifications["text"]] 
+    #used for loop instead of lambda for performance gains 
+    
+    

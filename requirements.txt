@@ -5,3 +5,8 @@ beautifulsoup4
 matplotlib
 seaborn
 requests 
+toolz
+langchain
+langsmith
+chroma
+transformers

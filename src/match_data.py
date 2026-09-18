@@ -2,7 +2,6 @@ import re
 import os
 import json
 import pandas as pd
-from toolz import compose
 from collections import defaultdict
 from difflib import SequenceMatcher
 
@@ -69,4 +68,59 @@ def match_data():
     notifications["extracted_text_lead"] = [extract_names(get_lead(t)) for t in notifications["text"]] 
     #used for loop instead of lambda for performance gains 
     
+    master_dir["extracted_title"] = master_dir["title"].apply(extract_names)
     
+    name_to_ids = defaultdict(set)
+    
+    for _, r in master_dir.iterrows():
+        for name in r["extracted_title"]:
+            name_to_ids[name].add(r["id"])
+    
+    
+    master_lookup = {name: next(iter(ids)) for name, ids in name_to_ids.items() if len(ids) == 1}
+    master_keys = list(master_lookup.keys())
+    
+    nbfc_pattern = re.compile(
+    r"non[\s-]?banking financial compan|nbfc"
+    r"|core investment compan(?:y|ies)"          # dropped bare \bcic\b — collides with Credit Information Company
+    r"|standalone primary dealer|\bspd\b"
+    r"|mortgage guarantee compan(?:y|ies)|\bmgc\b"
+    r"|non-?operative financial holding compan(?:y|ies)|\bnofhc\b"
+    r"|housing finance compan(?:y|ies)|\bhfc\b",
+    re.IGNORECASE
+    )
+    notifications["is_nbfc_relevant"] = (
+    notifications["text"].str.contains(nbfc_pattern, na=False) |
+    notifications["title"].str.contains(nbfc_pattern, na=False)
+    )
+
+    other_entity_pattern = re.compile(
+    r"regional rural bank"
+    r"|urban co-?operative bank"
+    r"|rural co-?operative bank"
+    r"|state co-?operative bank"
+    r"|district central co-?operative bank"
+    r"|scheduled commercial bank"
+    r"|commercial bank"
+    r"|payments? bank"
+    r"|small finance bank"
+    r"|local area bank"
+    r"|co-?operative bank"
+    r"|banker and debt manager to government"
+    r"|banker to governments? and banks"
+    r"|consumer education and protection"
+    r"|all india financial institutions?"
+    r"|asset reconstruction compan(?:y|ies)"
+    r"|credit information compan(?:y|ies)"
+    r"|financial inclusion and development"
+    r"|financial market"
+    r"|issuer of currency"
+    r"|payments? and settlement systems?",
+    re.IGNORECASE
+    )
+    
+    notifications["is_nbfc_in_title"] = notifications["title"].str.contains(nbfc_pattern, na = False)
+    notifications["is_nbfc_relevant"] = (
+        notifications["text"].str.contains(nbfc_pattern, na = False) | 
+        notifications["is_nbfc_in_title"]
+    )

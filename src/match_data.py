@@ -198,7 +198,7 @@ def match_data():
     disagreements = both[both["matched_id"] != both["id_master"]]
     print(f"{len(disagreements)} / {len(both)} disagree between regex-match and code-match")
     
-    
+    out_path = os.path.join(file_path,"..","Data",)
 
     
     

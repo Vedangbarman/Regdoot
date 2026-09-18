@@ -27,7 +27,6 @@ def norm(s):
     return cleaned.strip(" ,-").lower()
 
 
-
 def extract_names(text):
     DOC_TYPE = r"(?:Directions?|Guidelines?|Regulations?|Rules?|Circulars?|Framework|Scheme)"
         
@@ -59,6 +58,37 @@ def get_lead(text):
                                                      # used bucketing only! 
                                                      # gatorade
         
+
+def char_diff(a, b):
+    diff = 0
+    for tag, i1, i2, j1, j2 in SequenceMatcher(None, a, b).get_opcodes():
+        if tag != "equal":
+            diff += max(i2 - i1, j2 - j1)
+    return diff
+
+
+def match_row(row,master_lookup):
+    if row["discard_pre_match"]:
+        return None, "discarded"
+    for n in row["found_title"]:
+        if n in master_lookup:
+            return master_lookup[n], "title_match"
+    for n in row["found_text"]:          # full text, not lead
+        if n in master_lookup:
+            return master_lookup[n], "text_match"
+    return None, "no_match"
+
+
+def bucket(row):
+    if row["match_method"] == "discarded":
+        return "discard"
+    if row["match_method"] != "no_match":
+        return "linked"
+    if row["is_nbfc_relevant"]:
+        has_citation = len(row["found_title"]) > 0 or len(row["found_text_lead"]) > 0
+        return "nbfc_citation_unmatched" if has_citation else "nbfc_standalone"
+    return "general"   
+
 
 def match_data():
         
@@ -124,3 +154,35 @@ def match_data():
         notifications["text"].str.contains(nbfc_pattern, na = False) | 
         notifications["is_nbfc_in_title"]
     )
+    
+    notifications["discard_pre_match"] = notifications["names_other_entity"] & ~notifications["is_nbfc_relevant"]
+    
+    notifications[["matched_id", "match_method"]] = list(
+    notifications.apply(match_row, axis=1, args=(master_lookup,))
+    )
+    
+    fuzzy_candidates = []
+    for idx, row in notifications[notifications["match_method"] == "no_match"].iterrows():
+        for n in(row["found_title"] + row["found_text_lead"]):
+            for key in master_keys:
+                if char_diff(n,key)<=5:
+                    fuzzy_candidates.append((idx,row["id"],n,key))
+                    break
+                
+                
+    fuzzy_df = pd.DataFrame(fuzzy_candidates, columns=["row_idx", "circular_id", "extracted_name", "closest_master_name"])
+    print(f"{len(fuzzy_df)} candidates")
+    
+    fuzzy_df["master_id"] = fuzzy_df["closest_master_name"].map(master_lookup)
+
+    dupe_check = fuzzy_df.groupby("row_idx")["master_id"].nunique()
+    
+    ambiguous_rows = dupe_check[dupe_check > 1].index
+    
+    
+    safe_fuzzy = fuzzy_df[~fuzzy_df["row_idx"].isin(ambiguous_rows)].drop_duplicates("row_idx")
+    for _, r in safe_fuzzy.iterrows():
+        notifications.loc[r["row_idx"], "matched_id"]   = master_lookup[r["closest_master_name"]]
+        notifications.loc[r["row_idx"], "match_method"] = "fuzzy_match"
+        
+    

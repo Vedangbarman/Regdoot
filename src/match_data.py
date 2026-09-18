@@ -79,16 +79,6 @@ def match_row(row,master_lookup):
     return None, "no_match"
 
 
-def bucket(row):
-    if row["match_method"] == "discarded":
-        return "discard"
-    if row["match_method"] != "no_match":
-        return "linked"
-    if row["is_nbfc_relevant"]:
-        has_citation = len(row["found_title"]) > 0 or len(row["found_text_lead"]) > 0
-        return "nbfc_citation_unmatched" if has_citation else "nbfc_standalone"
-    return "general"   
-
 
 def match_data():
         
@@ -185,4 +175,31 @@ def match_data():
         notifications.loc[r["row_idx"], "matched_id"]   = master_lookup[r["closest_master_name"]]
         notifications.loc[r["row_idx"], "match_method"] = "fuzzy_match"
         
+    
+    ref_pattern = re.compile(r"([A-Z]+(?:\.[A-Z]+)+\.\d+)/([\d-]+)/(\d{4}-\d{2})")
+    
+    notifications["subject_code"] = notifications["text"].str.extract(ref_pattern)[1]
+    
+    master_dir["subject_code"] = master_dir["text"].str.extract(ref_pattern)[1]
+    
+    code_counts = master_dir.dropna(subset=["subject_code"]).groupby("subject_code")["id"].nunique()
+    generic_codes = code_counts[code_counts > 1].index.tolist()
+    clean_master = master_dir[~master_dir["subject_code"].isin(generic_codes)]
+
+    code_matches = notifications.merge(
+    clean_master.dropna(subset=["subject_code"])[["id", "subject_code"]],
+    on="subject_code", how="left", suffixes=("", "_master")
+    )
+    
+    both = code_matches[
+    code_matches["match_method"].isin(["title_match", "text_match", "fuzzy_match"]) &
+    code_matches["id_master"].notna()
+    ]
+    disagreements = both[both["matched_id"] != both["id_master"]]
+    print(f"{len(disagreements)} / {len(both)} disagree between regex-match and code-match")
+    
+    
+
+    
+    
     

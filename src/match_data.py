@@ -4,6 +4,7 @@ import json
 import pandas as pd
 from collections import defaultdict
 from difflib import SequenceMatcher
+from utils.week_file_save import current_week_file
 
 
 file_path = os.path.dirname(os.path.realpath(__file__))
@@ -198,8 +199,9 @@ def match_data():
     disagreements = both[both["matched_id"] != both["id_master"]]
     print(f"{len(disagreements)} / {len(both)} disagree between regex-match and code-match")
     
-    out_path = os.path.join(file_path,"..","Data",)
-
+    out_path = os.path.join(file_path,"..","Data","noitifications_matched")
+    out_path_csv = current_week_file(out_path,format = "csv")
     
+    kept = notifications[notifications["bucket"] != "discard"].copy()
     
-    
+    kept.to_csv(out_path_csv,index=False, encoding="utf-8-sig")

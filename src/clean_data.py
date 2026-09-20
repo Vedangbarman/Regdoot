@@ -3,7 +3,8 @@ import json
 import traceback
 import pandas as pd
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timezone
+from utils.error_store import error_store
 from utils.week_file_save import current_week_file
 
 
@@ -90,7 +91,11 @@ def clean_data():
                 return True
                     
             elif file_empty_status == "os_error":
-                print("FIle not found")
+                time = str(datetime.now(timezone.utc))
+                Error_Message = "File not found in clean_data.py while checking for file empty status"
+                error_count =  "Not Applicable"
+                Error_File = "clean_data"
+                error_store(Error_Message,time,error_count,Error_File)
                 return False
                     
             else :
@@ -102,8 +107,12 @@ def clean_data():
             return False
 
     except Exception as e:
-        traceback.print_exc()
-        print(e)
+        time = str(datetime.now(timezone.utc))
+        Error_Message = str(e)
+        error_count =  "Not Applicable"
+        Error_File = "clean_data"
+        error_store(Error_Message,time,error_count,Error_File)
+        return False
         
         
 if __name__ == "__main__":

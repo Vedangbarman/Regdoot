@@ -5,6 +5,7 @@ import pandas as pd
 from collections import defaultdict
 from difflib import SequenceMatcher
 from datetime import datetime, timezone
+from utils.error_store import error_store
 from utils.week_file_save import current_week_file
 
 
@@ -234,17 +235,10 @@ def match_data():
         
         elif  file_empty_status == "os_error":
             time = str(datetime.now(timezone.utc))
-            errors_ds = {}
-            errors_ds['Error_Message'] = "OS Error in scraper.py while checking for file empty status"
-            errors_ds['Time'] = time
-            errors_ds['Error Count'] = "Not Applicable"
-            errors_ds['Error_File'] = "Scraper"
-            format_errors = "json"
-            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
-            data = json.dumps(errors_ds)
-            with open (current_path_error_log, "a") as file:
-                file.write(data + "\n")
-            print(f"Data saved to {current_path_error_log}")
+            Error_Message = "Unknow Error in match_data.py while checking for file empty status"
+            error_count =  "Not Applicable"
+            Error_File = "Match_data"
+            error_store(Error_Message,time,error_count,Error_File)   
             return False
           
         config["data_check"]["matched_ref_file"] = out_path_csv

@@ -7,6 +7,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
 from utils.data_check import check_data
+from utils.error_store import error_store
 from utils.week_file_save import current_week_file
 
 
@@ -79,35 +80,19 @@ async def rbi_webscraper():
                         
                         elif  file_empty_status == "os_error":
                             time = str(datetime.now(timezone.utc))
-                                        
-                            errors_ds = {}
-                            errors_ds['Error_Message'] = "OS Error in scraper.py while checking for file empty status"
-                            errors_ds['Time'] = time
-                            errors_ds['Error Count'] = "Not Applicable"
-                            errors_ds['Error_File'] = "Scraper"
-                                        
-                            format_errors = "json"
-                            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
-                            data = json.dumps(errors_ds)
-                            with open (current_path_error_log, "a") as file:
-                                file.write(data + "\n")
-                            print(f"Data saved to {current_path_error_log}")
+                            Error_Message = "OS Error in scraper.py while checking for file empty status"
+                            error_count =  "Not Applicable"
+                            Error_File = "Scraper"
+                            error_store(Error_Message,time,error_count,Error_File)
                             return False
                            
                         else:
                             time = str(datetime.now(timezone.utc))
-                            errors_ds = {}
-                            errors_ds['Error_Message'] = "Unknow Error in scraper.py while checking for file empty status"
-                            errors_ds['Time'] = time
-                            errors_ds['Error Count'] = "Not Applicable"
-                            errors_ds['Error_File'] = "Scraper"
-                                                                    
-                            format_errors = "json"
-                            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
-                            data = json.dumps(errors_ds)
-                            with open (current_path_error_log, "a") as file:
-                                file.write(data + "\n")
-                            print(f"Data saved to {current_path_error_log}")
+                            time = str(datetime.now(timezone.utc))
+                            Error_Message = "Unknow Error in scraper.py while checking for file empty status"
+                            error_count =  "Not Applicable"
+                            Error_File = "Scraper"
+                            error_store(Error_Message,time,error_count,Error_File)
                             return False                          
                             
                     else:
@@ -130,18 +115,9 @@ async def rbi_webscraper():
             count +=1
             time = str(datetime.now(timezone.utc))
             
-            errors_ds = {}
-            errors_ds['Error_Message'] = error_message
-            errors_ds['Time'] = time
-            errors_ds['Error Count'] = count
-            errors_ds['Error_File'] = "Scraper"
-            
-            format_errors = "json"
-            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
-            data = json.dumps(errors_ds)
-            with open (current_path_error_log, "a") as file:
-                file.write(data + "\n")
-            print(f"Data saved to {current_path_error_log}")
+            time = str(datetime.now(timezone.utc))
+            Error_File = "Scraper"
+            error_store(error_message,time,count,Error_File)
 
         sleep_count = count*5
         print(f"Retrying in {sleep_count} seconds.......")

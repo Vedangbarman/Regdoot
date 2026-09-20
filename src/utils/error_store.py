@@ -1,0 +1,24 @@
+import os 
+import json
+from utils.week_file_save import current_week_file
+
+script_dir = os.path.dirname(os.path.realpath(__file__))
+out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","..","data","error_logs"))
+
+
+def error_store(error_message,time,error_count,error_file):
+    
+    errors_ds = {}
+    errors_ds['Error_Message'] = error_message
+    errors_ds['Time'] = time
+    errors_ds['Error Count'] = error_count
+    errors_ds['Error_File'] = error_file
+    format_errors = "json"
+    current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
+    data = json.dumps(errors_ds)
+    with open (current_path_error_log, "a") as file:
+        file.write(data + "\n")
+    print(f"Data saved to {current_path_error_log}")
+    
+
+

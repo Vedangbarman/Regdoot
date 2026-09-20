@@ -79,14 +79,22 @@ def match_row(row,master_lookup):
             return master_lookup[n], "text_match"
     return None, "no_match"
 
-
+def bucket(row):
+    if row["match_method"] == "discarded":
+        return "discard"
+    if row["match_method"] != "no_match":
+        return "linked"
+    if row["is_nbfc_relevant"]:
+        has_citation = len(row["found_title"]) > 0 or len(row["found_text_lead"]) > 0
+        return "nbfc_citation_unmatched" if has_citation else "nbfc_standalone"
+    return "general" 
 
 def match_data():
         
     notifications["extracted_title"] = notifications["title"].apply(extract_names)
-    notifications["extracted_text"] = notifications["text"].apply(extract_names)
+    notifications["extracted_text"] = notifications["clean_description"].apply(extract_names)
         
-    notifications["extracted_text_lead"] = [extract_names(get_lead(t)) for t in notifications["text"]] 
+    notifications["extracted_text_lead"] = [extract_names(get_lead(t)) for t in notifications["clean_description"]] 
     #used for loop instead of lambda for performance gains 
     
     master_dir["extracted_title"] = master_dir["title"].apply(extract_names)
@@ -111,7 +119,7 @@ def match_data():
     re.IGNORECASE
     )
     notifications["is_nbfc_relevant"] = (
-    notifications["text"].str.contains(nbfc_pattern, na=False) |
+    notifications["clean_description"].str.contains(nbfc_pattern, na=False) |
     notifications["title"].str.contains(nbfc_pattern, na=False)
     )
 
@@ -142,10 +150,11 @@ def match_data():
     
     notifications["is_nbfc_in_title"] = notifications["title"].str.contains(nbfc_pattern, na = False)
     notifications["is_nbfc_relevant"] = (
-        notifications["text"].str.contains(nbfc_pattern, na = False) | 
+        notifications["clean_description"].str.contains(nbfc_pattern, na = False) | 
         notifications["is_nbfc_in_title"]
     )
     
+    notifications["names_other_entity"] = notifications["title"].str.contains(other_entity_pattern, na=False)
     notifications["discard_pre_match"] = notifications["names_other_entity"] & ~notifications["is_nbfc_relevant"]
     
     notifications[["matched_id", "match_method"]] = list(
@@ -176,10 +185,10 @@ def match_data():
         notifications.loc[r["row_idx"], "matched_id"]   = master_lookup[r["closest_master_name"]]
         notifications.loc[r["row_idx"], "match_method"] = "fuzzy_match"
         
-    
+    notifications["bucket"] = notifications.apply(bucket, axis=1)
     ref_pattern = re.compile(r"([A-Z]+(?:\.[A-Z]+)+\.\d+)/([\d-]+)/(\d{4}-\d{2})")
     
-    notifications["subject_code"] = notifications["text"].str.extract(ref_pattern)[1]
+    notifications["subject_code"] = notifications["clean_description"].str.extract(ref_pattern)[1]
     
     master_dir["subject_code"] = master_dir["text"].str.extract(ref_pattern)[1]
     
@@ -192,20 +201,25 @@ def match_data():
     on="subject_code", how="left", suffixes=("", "_master")
     )
     
-    both = code_matches[
-    code_matches["match_method"].isin(["title_match", "text_match", "fuzzy_match"]) &
-    code_matches["id_master"].notna()
-    ]
-    disagreements = both[both["matched_id"] != both["id_master"]]
-    print(f"{len(disagreements)} / {len(both)} disagree between regex-match and code-match")
+   
     
-    out_path = os.path.join(file_path,"..","Data","noitifications_matched")
+    out_path = os.path.join(file_path,"..","Data","notifications_matched")
     out_path_csv = current_week_file(out_path,format = "csv")
     
     kept = notifications[notifications["bucket"] != "discard"].copy()
     
-    kept.to_csv(out_path_csv,index=False, encoding="utf-8-sig")
-    
-    config["data_check"]["matched_ref_file"] = out_path_csv
-    with open(in_dir_config_file) as config_file:
-        json.dump(config, config_file)
+    if ( len(fuzzy_df)>0 ):
+        kept.to_csv(out_path_csv,index=False, encoding="utf-8-sig")
+        config["data_check"]["matched_ref_file"] = out_path_csv
+        print()
+        print(f"{len(fuzzy_df)} : Candidates Saved")
+        with open(in_dir_config_file, "w") as config_file:
+            json.dump(config, config_file, indent=4)
+            return True
+    else:
+        print("None Saved")
+        return False
+        
+        
+if __name__ == "__main__":
+    match_data()

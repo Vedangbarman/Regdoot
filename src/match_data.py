@@ -4,15 +4,18 @@ import json
 import pandas as pd
 from collections import defaultdict
 from difflib import SequenceMatcher
+from datetime import datetime, timezone
 from utils.week_file_save import current_week_file
 
 
 file_path = os.path.dirname(os.path.realpath(__file__))
 
 in_dir_config_file = os.path.abspath(os.path.join(file_path,"..","config.json"))
+out_dir_error_logs = os.path.abspath(os.path.join(file_path,"..","data","error_logs"))
 
 with open(in_dir_config_file) as config_file:
     config = json.load(config_file)
+
 
 clean_notifications_path = config["data_check"]["clean_ref_file"] 
 
@@ -21,6 +24,17 @@ master_dir = pd.read_json(in_dir_master_direction, lines = True)
 
 notifications = pd.read_csv(clean_notifications_path)
 
+
+
+def isFileEmpty(filename): 
+    try:
+        if os.stat(filename).st_size > 0:
+               return False
+        else:
+            return True
+    except OSError:
+        flag = "os_error"
+        return flag
 
 def norm(s):
     cleaned = s.replace("–", "-").replace("—", "-") #replace en-dahses with normal dashes
@@ -209,13 +223,36 @@ def match_data():
     kept = notifications[notifications["bucket"] != "discard"].copy()
     
     if ( len(fuzzy_df)>0 ):
-        kept.to_csv(out_path_csv,index=False, encoding="utf-8-sig")
+        file_empty_status = isFileEmpty(out_path_csv)
+        if file_empty_status == True:
+            kept.to_csv(out_path_csv,mode = "a",header = True,index=False, encoding="utf-8-sig")
+            print(f"{len(fuzzy_df)} : Candidates Saved")
+            
+        elif file_empty_status == False:
+            kept.to_csv(out_path_csv,mode = "a",header = False,index=False, encoding="utf-8-sig")
+            print(f"{len(fuzzy_df)} : Candidates Saved")
+        
+        elif  file_empty_status == "os_error":
+            time = str(datetime.now(timezone.utc))
+            errors_ds = {}
+            errors_ds['Error_Message'] = "OS Error in scraper.py while checking for file empty status"
+            errors_ds['Time'] = time
+            errors_ds['Error Count'] = "Not Applicable"
+            errors_ds['Error_File'] = "Scraper"
+            format_errors = "json"
+            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
+            data = json.dumps(errors_ds)
+            with open (current_path_error_log, "a") as file:
+                file.write(data + "\n")
+            print(f"Data saved to {current_path_error_log}")
+            return False
+          
         config["data_check"]["matched_ref_file"] = out_path_csv
-        print()
-        print(f"{len(fuzzy_df)} : Candidates Saved")
         with open(in_dir_config_file, "w") as config_file:
             json.dump(config, config_file, indent=4)
             return True
+        
+        
     else:
         print("None Saved")
         return False

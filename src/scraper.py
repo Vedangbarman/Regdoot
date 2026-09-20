@@ -5,9 +5,10 @@ import asyncio
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
+from datetime import datetime, timezone
 from utils.data_check import check_data
 from utils.week_file_save import current_week_file
-from datetime import datetime, timezone, timedelta
+
 
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -77,9 +78,36 @@ async def rbi_webscraper():
                             return True
                         
                         elif  file_empty_status == "os_error":
+                            time = str(datetime.now(timezone.utc))
+                                        
+                            errors_ds = {}
+                            errors_ds['Error_Message'] = "OS Error in scraper.py while checking for file empty status"
+                            errors_ds['Time'] = time
+                            errors_ds['Error Count'] = "Not Applicable"
+                            errors_ds['Error_File'] = "Scraper"
+                                        
+                            format_errors = "json"
+                            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
+                            data = json.dumps(errors_ds)
+                            with open (current_path_error_log, "a") as file:
+                                file.write(data + "\n")
+                            print(f"Data saved to {current_path_error_log}")
                             return False
                            
                         else:
+                            time = str(datetime.now(timezone.utc))
+                            errors_ds = {}
+                            errors_ds['Error_Message'] = "Unknow Error in scraper.py while checking for file empty status"
+                            errors_ds['Time'] = time
+                            errors_ds['Error Count'] = "Not Applicable"
+                            errors_ds['Error_File'] = "Scraper"
+                                                                    
+                            format_errors = "json"
+                            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
+                            data = json.dumps(errors_ds)
+                            with open (current_path_error_log, "a") as file:
+                                file.write(data + "\n")
+                            print(f"Data saved to {current_path_error_log}")
                             return False                          
                             
                     else:

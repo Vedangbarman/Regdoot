@@ -1,5 +1,4 @@
 import os
-import lxml
 import json 
 import asyncio
 import requests
@@ -87,7 +86,6 @@ async def rbi_webscraper():
                             return False
                            
                         else:
-                            time = str(datetime.now(timezone.utc))
                             time = str(datetime.now(timezone.utc))
                             Error_Message = "Unknow Error in scraper.py while checking for file empty status"
                             error_count =  "Not Applicable"

@@ -20,7 +20,7 @@ data/notification_historical/*
 !data/notifications/.gitkeep
 !data/error_logs/.gitkeep
 !data/notifications_clean/.gitkeep
-data/notifications_matched/.gitkeep
+!data/notifications_matched/.gitkeep
 *.csv
 *.parquet
 

@@ -208,4 +208,4 @@ def match_data():
     
     config["data_check"]["matched_ref_file"] = out_path_csv
     with open(in_dir_config_file) as config_file:
-        json.dump(config)
+        json.dump(config, config_file)

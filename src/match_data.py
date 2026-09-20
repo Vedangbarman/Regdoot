@@ -205,3 +205,7 @@ def match_data():
     kept = notifications[notifications["bucket"] != "discard"].copy()
     
     kept.to_csv(out_path_csv,index=False, encoding="utf-8-sig")
+    
+    config["data_check"]["matched_ref_file"] = out_path_csv
+    with open(in_dir_config_file) as config_file:
+        json.dump(config)

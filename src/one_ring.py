@@ -3,6 +3,7 @@ import json
 import asyncio
 import pandas as pd
 from scraper import rbi_webscraper
+from utils.error_store import error_store
 from utils.week_file_save import current_week_file
 from datetime import datetime, timezone, timedelta
 
@@ -35,18 +36,13 @@ async def ring():
             error_message = str(e)
             count +=1
             time = str(datetime.now(timezone.utc))
-            errors_ds = {}
-            errors_ds['Error_Message'] = error_message
-            errors_ds['Time'] = time
-            errors_ds['Error Count'] = count
-            errors_ds['Error_File'] = "Scraper"
-                        
-            format_errors = "json"
-            current_path_error_log = current_week_file(out_dir_error_logs,format_errors)
-            data = json.dumps(errors_ds)
-            with open (current_path_error_log, "a") as file:
-                file.write(data + "\n")
-                print(f"Data saved to {current_path_error_log}")
+            
+            Error_Message = error_message
+            Time = time
+            Error_Count = count
+            Error_File = "Ring_file"
+            error_store(Error_Message,Time,Error_Count,Error_File)
+            
         
         config = json.load(in_dir_config_file)
         sleep_count = 86400

@@ -112,8 +112,6 @@ async def rbi_webscraper():
             error_message = str(e)
             count +=1
             time = str(datetime.now(timezone.utc))
-            
-            time = str(datetime.now(timezone.utc))
             Error_File = "Scraper"
             error_store(error_message,time,count,Error_File)
 

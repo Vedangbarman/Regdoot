@@ -219,18 +219,18 @@ def match_data():
    
     
     out_path = os.path.join(file_path,"..","Data","notifications_matched")
-    out_path_csv = current_week_file(out_path,format = "csv")
+    out_path_json = current_week_file(out_path,format = "json")
     
     kept = notifications[notifications["bucket"] != "discard"].copy()
     
     if ( len(fuzzy_df)>0 ):
-        file_empty_status = isFileEmpty(out_path_csv)
+        file_empty_status = isFileEmpty(out_path_json)
         if file_empty_status == True:
-            kept.to_csv(out_path_csv,mode = "a",header = True,index=False, encoding="utf-8-sig")
+            kept.to_json(out_path_json,mode = "a",header = True,index=False, encoding="utf-8-sig")
             print(f"{len(fuzzy_df)} : Candidates Saved")
             
         elif file_empty_status == False:
-            kept.to_csv(out_path_csv,mode = "a",header = False,index=False, encoding="utf-8-sig")
+            kept.to_json(out_path_json,mode = "a",header = False,index=False, encoding="utf-8-sig")
             print(f"{len(fuzzy_df)} : Candidates Saved")
         
         elif  file_empty_status == "os_error":
@@ -241,7 +241,7 @@ def match_data():
             error_store(Error_Message,time,error_count,Error_File)   
             return False
           
-        config["data_check"]["matched_ref_file"] = out_path_csv
+        config["data_check"]["matched_ref_file"] = out_path_json
         with open(in_dir_config_file, "w") as config_file:
             json.dump(config, config_file, indent=4)
             return True

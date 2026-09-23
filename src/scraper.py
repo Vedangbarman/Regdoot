@@ -1,4 +1,5 @@
 import os
+import lxml
 import json 
 import asyncio
 import requests

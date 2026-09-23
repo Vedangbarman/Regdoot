@@ -1,9 +1,14 @@
 import os 
 import json
 from utils.week_file_save import current_week_file
-
+from datetime import datetime, timezone
 script_dir = os.path.dirname(os.path.realpath(__file__))
 out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","..","data","error_logs"))
+
+
+def check():
+    time =  str(datetime.now(timezone.utc))
+    error_store("Debug",time,"Not Applicable","Debug")
 
 
 def error_store(error_message,time,error_count,error_file):
@@ -20,5 +25,6 @@ def error_store(error_message,time,error_count,error_file):
         file.write(data + "\n")
     print(f"Data saved to {current_path_error_log}")
     
-
-
+if __name__ == "__main__":
+    time =  str(datetime.now(timezone.utc))
+    error_store("Debug",time,"Not Applicable","Debug")

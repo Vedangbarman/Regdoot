@@ -1,13 +1,12 @@
 import os
 import json
-import asyncio
-import pandas as pd
+import time
+from match_data import match_data
+from clean_data import clean_data
 from scraper import rbi_webscraper
 from utils.error_store import error_store
-from utils.week_file_save import current_week_file
-from datetime import datetime, timezone, timedelta
-
-
+from datetime import datetime, timezone
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 out_dir_error_logs = os.path.abspath(os.path.join(script_dir,"..","data","error_logs"))
@@ -15,38 +14,79 @@ os.makedirs(out_dir_error_logs,exist_ok = True)
 
 in_dir_config_file = os.path.abspath(os.path.join(script_dir,"..","config.json"))
 
+with open(in_dir_config_file) as file:
+    data = json.load(file)
+print("File Loaded!")
 
-
-async def ring():
+def ring():
     count = 0
-    while True:
+    while count < 5:
         try:
-            with open(in_dir_config_file) as file:
-                data = json.load(file)
-            time = datetime.now().strftime("%H")
-            time_scraper = data["time_scraper"]
-            if time_scraper == time:
-                flag = rbi_webscraper()
+            flag = rbi_webscraper()
+            print("Scraped")
+            if flag == True:
+                flag = clean_data()
+                print("Cleaned")
                 if flag == True:
-                    continue
+                    flag = match_data()
+                    print("Matched")
+                    if flag == True:
+                        print("Worked Fine ggwp")
+                    else:
+                        print("Matched returned false")
+                else:
+                    print("Cleaned returned false")
+            else:
+                print("Scraper return false")
+            break         
                 
-            
         except Exception as e:
-            print(f"Error {e}")
-            error_message = str(e)
-            count +=1
-            time = str(datetime.now(timezone.utc))
-            
-            Error_Message = error_message
-            Time = time
-            Error_Count = count
-            Error_File = "Ring_file"
-            error_store(Error_Message,Time,Error_Count,Error_File)
-            
+                print(f"Error {e}")
+                error_message = str(e)
+                count +=1
+                timestamp = str(datetime.now(timezone.utc))
+                
+                Error_Message = error_message
+                Time = timestamp
+                Error_Count = count
+                Error_File = "Ring_file"
+                error_store(Error_Message,Time,Error_Count,Error_File)
+                time.sleep(count*5)
         
-        config = json.load(in_dir_config_file)
-        sleep_count = 86400
-        n = config["run_count"]
-        await asyncio.sleep(sleep_count/n)
         
+if __name__ == "__main__":
+    ring()
+    scheduler = BlockingScheduler()
     
+    run_count = data["scraper_settings"]["run_count"]
+    start_time = data["scraper_settings"]["time_scraper"]
+    if run_count <= 1:
+        scheduler.add_job(
+        ring, 
+        'cron', 
+        hour=start_time, 
+        minute=0, 
+        id='daily_fixed_run'
+        )
+    
+    else:
+        interval = int(24/run_count)
+        i = 0
+        for i in range(0,run_count):
+            end_hour = int(start_time) + (i*interval)
+            if(end_hour>=24):
+                end_hour -= 24
+                end_hour
+            scheduler.add_job(
+            ring, 
+            'cron', 
+            hour=f"{str(end_hour)}", 
+            minute=0, 
+            id=f'{str(i)}th_interval_runs',
+            replace_existing=True      
+        )
+            
+    try:
+        scheduler.start()
+    except (KeyboardInterrupt, SystemExit):
+        pass

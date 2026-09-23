@@ -50,15 +50,27 @@ def clean_data():
         ref_date = config_data["data_check"]["ref_date"]
         delta_ref_date = config_data["data_check"]["delta_ref_date"]
         
-        ref_date_formatted = datetime.strptime(ref_date,date_format)
-        delta_ref_date_formatted = datetime.strptime(delta_ref_date,date_format)
+        if ref_date != "zero" and delta_ref_date != "zero":
+            ref_date_formatted = datetime.strptime(ref_date,date_format)
+            delta_ref_date_formatted = datetime.strptime(delta_ref_date,date_format)
         
         
         notification_data = pd.read_csv(file_path)
         format = "csv"
         clean_xml_path = current_week_file(out_dir_notifications_clean,format)
-        file_empty_status = isFileEmpty(clean_xml_path)
-        if ref_date_formatted == delta_ref_date_formatted:
+        file_empty_status = isFileEmpty(out_dir_notifications)
+        
+        if ref_date == "zero":
+            notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
+            notification_data = notification_data.drop("description",axis='columns')
+            notification_data.to_csv(clean_xml_path,mode = 'a',header = True,index = False, encoding = 'utf-8')
+            print(f"Data Saved to {clean_xml_path}")
+            config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
+            with open(in_dir_config_file, 'w') as file:
+                json.dump(config_data, file, indent=4)
+            return True
+            
+        elif ref_date_formatted == delta_ref_date_formatted:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
                 notification_data = notification_data.drop("description",axis='columns')
                 notification_data.to_csv(clean_xml_path,mode = 'a',header = True,index = False, encoding = 'utf-8')
@@ -67,7 +79,6 @@ def clean_data():
                 with open(in_dir_config_file, 'w') as file:
                     json.dump(config_data, file, indent=4)
                 return True
-            
                 
         elif ref_date_formatted > delta_ref_date_formatted:
             if file_empty_status == True:

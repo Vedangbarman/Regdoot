@@ -1,7 +1,6 @@
 import os
 import lxml
 import json 
-import asyncio
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -34,8 +33,7 @@ def isFileEmpty(filename):
 
 
 
-async def rbi_webscraper():
-    
+def rbi_webscraper():
     count = 0
     while count < 5:
         try: 
@@ -71,32 +69,41 @@ async def rbi_webscraper():
                         if file_empty_status == True:
                             pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
                             print(f"Data saved to {current_path_notifications}")
+                            config_data["data_check"]["ref_file"] = str(current_path_notifications)
+                            with open(in_dir_config_file, 'w') as file:
+                                json.dump(config_data, file, indent=4)
                             return True
                                 
                         elif file_empty_status == False:
                             pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')
                             print(f"Data saved to {current_path_notifications}")
+                            config_data["data_check"]["ref_file"] = str(current_path_notifications)
+                            with open(in_dir_config_file, 'w') as file:
+                                json.dump(config_data, file, indent=4)
                             return True
                         
                         elif  file_empty_status == "os_error":
-                            time = str(datetime.now(timezone.utc))
+                            timestamp = str(datetime.now(timezone.utc))
                             Error_Message = "OS Error in scraper.py while checking for file empty status"
                             error_count =  "Not Applicable"
                             Error_File = "Scraper"
-                            error_store(Error_Message,time,error_count,Error_File)
+                            error_store(Error_Message,timestamp,error_count,Error_File)
                             return False
                            
                         else:
-                            time = str(datetime.now(timezone.utc))
+                            timestamp = str(datetime.now(timezone.utc))
                             Error_Message = "Unknow Error in scraper.py while checking for file empty status"
                             error_count =  "Not Applicable"
                             Error_File = "Scraper"
-                            error_store(Error_Message,time,error_count,Error_File)
+                            error_store(Error_Message,timestamp,error_count,Error_File)
                             return False                          
                             
                     else:
                         pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
                         print(f"Data saved to {current_path_notifications}")
+                        config_data["data_check"]["ref_file"] = str(current_path_notifications)
+                        with open(in_dir_config_file, 'w') as file:
+                            json.dump(config_data, file, indent=4)
                         return True 
                 
                 else:
@@ -105,7 +112,7 @@ async def rbi_webscraper():
             else:
                 print("nothing Found")
                 return False
-            
+            break
             
         except Exception as e:
             
@@ -114,14 +121,14 @@ async def rbi_webscraper():
             count +=1
             time = str(datetime.now(timezone.utc))
             Error_File = "Scraper"
-            error_store(error_message,time,count,Error_File)
+            error_store(error_message,timestamp,count,Error_File)
 
         sleep_count = count*5
         print(f"Retrying in {sleep_count} seconds.......")
-        await asyncio.sleep(sleep_count)
+        time.sleep(sleep_count)
                 
 if __name__ == "__main__":
-    asyncio.run(rbi_webscraper())
+    rbi_webscraper()
         
         
     

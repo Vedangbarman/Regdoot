@@ -12,15 +12,15 @@ __pycache__/
 
 # Data 
 data/error_logs/*
-data/notifications/*
 data/notifications_clean/*
 data/notifications_matched/*
 data/master_directory/*
 data/notification_historical/*
-!data/notifications/.gitkeep
+data/notifications_output/*
 !data/error_logs/.gitkeep
 !data/notifications_clean/.gitkeep
 !data/notifications_matched/.gitkeep
+!data/notifications_output/.gitkeep
 *.csv
 *.parquet
 

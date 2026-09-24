@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import traceback
 from match_data import match_data
 from clean_data import clean_data
 from scraper import rbi_webscraper
@@ -23,15 +24,16 @@ def ring():
     while count < 5:
         try:
             flag = rbi_webscraper()
-            print("Scraped")
-            if flag == True:
-                flag = clean_data()
-                print("Cleaned")
-                if flag == True:
-                    flag = match_data()
-                    print("Matched")
+            print("Scraper loaded")
+            if flag is not False:
+                flag = clean_data(flag)
+                print("Data Cleaned")
+                print("Clean file laoded")
+                if flag is not False:
+                    flag = match_data(flag)
+                    print("Match file loaded")
                     if flag == True:
-                        print("Worked Fine ggwp")
+                        print("Data Matched")
                     else:
                         print("Matched returned false")
                 else:
@@ -50,7 +52,8 @@ def ring():
                 Time = timestamp
                 Error_Count = count
                 Error_File = "Ring_file"
-                error_store(Error_Message,Time,Error_Count,Error_File)
+                trace_back = traceback.format_exc()
+                error_store(Error_Message,trace_back,Time,Error_Count,Error_File)
                 time.sleep(count*5)
         
         

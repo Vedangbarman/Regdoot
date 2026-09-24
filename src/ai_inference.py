@@ -1,6 +1,7 @@
 import os
 import json
 import pandas as pd
+import traceback
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from datetime import datetime, timezone
@@ -17,16 +18,6 @@ os.environ["GOOGLE_API_KEY"] = API_KEY
 #debugging code remove later
 debug = True
 
-
-def isFileEmpty(filename): 
-    try:
-        if os.stat(filename).st_size > 0:
-               return False
-        else:
-            return True
-    except OSError:
-        flag = "os_error"
-        return flag
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 in_dir_config = os.path.abspath(os.path.join(script_dir,"..","config.json"))
@@ -129,7 +120,7 @@ def invoke_ai():
             return False
     
     except Exception as e:
-        error_store(error_message=str(e),time = str(datetime.now(timezone.utc)),error_count="Null",error_file="ai_inference")
+        error_store(error_message=str(e),trace_back = traceback.format_exc(),time = str(datetime.now(timezone.utc)),error_count="Null",error_file="ai_inference")
         
 if __name__ == "__main__":
     invoke_ai()

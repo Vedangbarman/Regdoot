@@ -11,11 +11,12 @@ def check():
     error_store("Debug",time,"Not Applicable","Debug")
 
 
-def error_store(error_message,time,error_count,error_file):
+def error_store(error_message,trace_back,time,error_count,error_file):
     
     errors_ds = {}
     errors_ds['Error_Message'] = error_message
     errors_ds['Time'] = time
+    errors_ds['Trace_back'] = trace_back
     errors_ds['Error Count'] = error_count
     errors_ds['Error_File'] = error_file
     format_errors = "json"

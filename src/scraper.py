@@ -2,6 +2,8 @@ import os
 import lxml
 import json 
 import requests
+import time
+import traceback
 import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime, timezone
@@ -67,27 +69,20 @@ def rbi_webscraper():
                     if path_check == True:
                         file_empty_status = isFileEmpty(current_path_notifications)
                         if file_empty_status == True:
-                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                            print(f"Data saved to {current_path_notifications}")
-                            config_data["data_check"]["ref_file"] = str(current_path_notifications)
-                            with open(in_dir_config_file, 'w') as file:
-                                json.dump(config_data, file, indent=4)
-                            return True
+                            
+                            return pr_dataframe
                                 
                         elif file_empty_status == False:
-                            pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = False,index = False, encoding = 'utf-8')
-                            print(f"Data saved to {current_path_notifications}")
-                            config_data["data_check"]["ref_file"] = str(current_path_notifications)
-                            with open(in_dir_config_file, 'w') as file:
-                                json.dump(config_data, file, indent=4)
-                            return True
-                        
+                            
+                            return pr_dataframe
+                            
                         elif  file_empty_status == "os_error":
                             timestamp = str(datetime.now(timezone.utc))
                             Error_Message = "OS Error in scraper.py while checking for file empty status"
                             error_count =  "Not Applicable"
                             Error_File = "Scraper"
-                            error_store(Error_Message,timestamp,error_count,Error_File)
+                            trace_back = traceback.format_exc()
+                            error_store(Error_Message,trace_back,timestamp,error_count,Error_File)
                             return False
                            
                         else:
@@ -95,16 +90,13 @@ def rbi_webscraper():
                             Error_Message = "Unknow Error in scraper.py while checking for file empty status"
                             error_count =  "Not Applicable"
                             Error_File = "Scraper"
-                            error_store(Error_Message,timestamp,error_count,Error_File)
+                            trace_back = traceback.format_exc()
+                            error_store(Error_Message,trace_back,timestamp,error_count,Error_File)
                             return False                          
                             
                     else:
-                        pr_dataframe.to_csv(current_path_notifications,mode = 'a',header = True,index = False, encoding = 'utf-8')
-                        print(f"Data saved to {current_path_notifications}")
-                        config_data["data_check"]["ref_file"] = str(current_path_notifications)
-                        with open(in_dir_config_file, 'w') as file:
-                            json.dump(config_data, file, indent=4)
-                        return True 
+                        
+                        return pr_dataframe
                 
                 else:
                     print("nothing Found")
@@ -119,9 +111,10 @@ def rbi_webscraper():
             print(f"Error {e}")
             error_message = str(e)
             count +=1
-            time = str(datetime.now(timezone.utc))
+            timestamp = str(datetime.now(timezone.utc))
             Error_File = "Scraper"
-            error_store(error_message,timestamp,count,Error_File)
+            trace_back = traceback.format_exc()
+            error_store(error_message,trace_back,timestamp,error_count,Error_File)
 
         sleep_count = count*5
         print(f"Retrying in {sleep_count} seconds.......")

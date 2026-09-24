@@ -1,6 +1,7 @@
 import os
 import json 
 from datetime import datetime,timezone
+from email.utils import parsedate_to_datetime
 from utils.week_file_save import current_week_file
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -29,8 +30,8 @@ def check_data(article_list,file_path):
                 
                 elif ref_date != "zero" and delta_ref_date != "zero" and ref_article != "zero":
                     pubDate = article["pubDate"]
-                    pubDate_formatted = datetime.strptime(pubDate,date_format)
-                    ref_date_formatted = datetime.strptime(ref_date,date_format)
+                    pubDate_formatted = parsedate_to_datetime(pubDate)
+                    ref_date_formatted = parsedate_to_datetime(ref_date)
                     if pubDate_formatted > ref_date_formatted:
                         valid_articles.append(article)
                     

@@ -40,7 +40,7 @@ def clean_xml(xml_data):
     return clean_text
 
 
-def clean_data():
+def clean_data(notification_data):
     try : 
         with open (in_dir_config_file) as file:
             config_data = json.load(file)
@@ -55,7 +55,6 @@ def clean_data():
             delta_ref_date_formatted = datetime.strptime(delta_ref_date,date_format)
         
         
-        notification_data = pd.read_csv(file_path)
         format = "csv"
         clean_xml_path = current_week_file(out_dir_notifications_clean,format)
         file_empty_status = isFileEmpty(out_dir_notifications)
@@ -68,7 +67,7 @@ def clean_data():
             config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
             with open(in_dir_config_file, 'w') as file:
                 json.dump(config_data, file, indent=4)
-            return True
+            return notification_data
             
         elif ref_date_formatted == delta_ref_date_formatted:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
@@ -78,7 +77,7 @@ def clean_data():
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
                 with open(in_dir_config_file, 'w') as file:
                     json.dump(config_data, file, indent=4)
-                return True
+                return notification_data
                 
         elif ref_date_formatted > delta_ref_date_formatted:
             if file_empty_status == True:
@@ -89,7 +88,7 @@ def clean_data():
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
                 with open(in_dir_config_file, 'w') as file:
                     json.dump(config_data, file, indent=4)
-                return True
+                return notification_data
                     
             elif file_empty_status == False:
                 notification_data['clean_description'] = notification_data['description'].apply(clean_xml)
@@ -99,7 +98,7 @@ def clean_data():
                 config_data["data_check"]["clean_ref_file"] = str(clean_xml_path)
                 with open(in_dir_config_file, 'w') as file:
                     json.dump(config_data, file, indent=4)
-                return True
+                return notification_data
                     
             elif file_empty_status == "os_error":
                 time = str(datetime.now(timezone.utc))
@@ -122,7 +121,8 @@ def clean_data():
         Error_Message = str(e)
         error_count =  "Not Applicable"
         Error_File = "clean_data"
-        error_store(Error_Message,time,error_count,Error_File)
+        trace_back = traceback.format_exc()
+        error_store(Error_Message,trace_back,time,error_count,Error_File)
         return False
         
         

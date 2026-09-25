@@ -112,7 +112,7 @@ def invoke_ai():
             df_results.to_json(output_path,orient="records",lines=True)
             
             if results:
-                return True
+                return df_results
             else:
                 return False
         
